@@ -9,7 +9,8 @@ import {
     MoreVertical,
     ShieldCheck,
     Star,
-    MapPin
+    MapPin,
+    TrendingUp
 } from 'lucide-react';
 import Modal from '../components/common/Modal';
 import { useGetDriversQuery, useAddDriverMutation } from '../redux/api/fleetApi';
