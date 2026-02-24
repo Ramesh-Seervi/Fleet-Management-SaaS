@@ -17,6 +17,7 @@ import { useGetDriversQuery, useAddDriverMutation } from '../redux/api/fleetApi'
 import toast from 'react-hot-toast';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import ExportButton from '../components/common/ExportButton';
+import GuestRestrictionModal from '../components/common/GuestRestrictionModal';
 
 const DriverCard = ({ driver }) => (
     <div className="glass-card p-6 rounded-[2rem] border-slate-100 hover:shadow-2xl hover:shadow-slate-200/50 transition-all duration-300 group">
@@ -76,6 +77,7 @@ const Drivers = () => {
     const [addDriver, { isLoading: isAdding }] = useAddDriverMutation();
     const [searchTerm, setSearchTerm] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isGuestModalOpen, setIsGuestModalOpen] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -131,7 +133,13 @@ const Drivers = () => {
                         ]}
                     />
                     <button
-                        onClick={() => setIsModalOpen(true)}
+                        onClick={() => {
+                            if (localStorage.getItem('token') === 'dev-bypass-token') {
+                                setIsGuestModalOpen(true);
+                            } else {
+                                setIsModalOpen(true);
+                            }
+                        }}
                         className="inline-flex items-center gap-2 px-6 py-3 bg-brand-500 text-white rounded-2xl font-bold text-sm shadow-xl shadow-brand-500/20 hover:bg-brand-600 hover:-translate-y-0.5 transition-all"
                     >
                         <Plus size={18} />
@@ -292,6 +300,11 @@ const Drivers = () => {
                     <DriverCard key={i} driver={driver} />
                 ))}
             </div>
+
+            <GuestRestrictionModal
+                isOpen={isGuestModalOpen}
+                onClose={() => setIsGuestModalOpen(false)}
+            />
         </div>
     );
 };

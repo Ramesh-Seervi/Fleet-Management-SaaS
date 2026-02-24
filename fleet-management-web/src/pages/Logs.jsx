@@ -26,6 +26,7 @@ import {
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import ExportButton from '../components/common/ExportButton';
 import toast from 'react-hot-toast';
+import GuestRestrictionModal from '../components/common/GuestRestrictionModal';
 
 const cn = (...classes) => classes.filter(Boolean).join(' ');
 
@@ -48,6 +49,7 @@ const Logs = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isGuestModalOpen, setIsGuestModalOpen] = useState(false);
 
     // Sync tab with URL path
     const getTabFromPath = () => {
@@ -170,7 +172,13 @@ const Logs = () => {
                         tableId="logs-container"
                     />
                     <button
-                        onClick={() => setIsModalOpen(true)}
+                        onClick={() => {
+                            if (localStorage.getItem('token') === 'dev-bypass-token') {
+                                setIsGuestModalOpen(true);
+                            } else {
+                                setIsModalOpen(true);
+                            }
+                        }}
                         className="inline-flex items-center gap-2 px-6 py-3 bg-brand-500 text-white rounded-2xl font-bold text-sm shadow-xl shadow-brand-500/20 hover:bg-brand-600 transition-all"
                     >
                         <Plus size={18} />
@@ -565,6 +573,11 @@ const Logs = () => {
                     </div>
                 )}
             </div>
+
+            <GuestRestrictionModal
+                isOpen={isGuestModalOpen}
+                onClose={() => setIsGuestModalOpen(false)}
+            />
         </div>
     );
 };

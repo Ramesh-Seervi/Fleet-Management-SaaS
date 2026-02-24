@@ -16,6 +16,7 @@ import toast from 'react-hot-toast';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import ExportButton from '../components/common/ExportButton';
 import Modal from '../components/common/Modal';
+import GuestRestrictionModal from '../components/common/GuestRestrictionModal';
 
 const VehicleStatus = ({ status }) => {
     const configs = {
@@ -41,6 +42,7 @@ const Vehicles = () => {
     const [addVehicle, { isLoading: isAdding }] = useAddVehicleMutation();
     const [searchTerm, setSearchTerm] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isGuestModalOpen, setIsGuestModalOpen] = useState(false);
     const [formData, setFormData] = useState({
         registrationNumber: '',
         make: '',
@@ -91,7 +93,13 @@ const Vehicles = () => {
                         ]}
                     />
                     <button
-                        onClick={() => setIsModalOpen(true)}
+                        onClick={() => {
+                            if (localStorage.getItem('token') === 'dev-bypass-token') {
+                                setIsGuestModalOpen(true);
+                            } else {
+                                setIsModalOpen(true);
+                            }
+                        }}
                         className="inline-flex items-center gap-2 px-6 py-3 bg-brand-500 text-white rounded-2xl font-bold text-sm shadow-xl shadow-brand-500/20 hover:bg-brand-600 hover:-translate-y-0.5 transition-all"
                     >
                         <Plus size={18} />
@@ -342,6 +350,11 @@ const Vehicles = () => {
                     <p className="text-sm text-amber-700 leading-relaxed">Two vehicles are nearing their scheduled maintenance interval. Consider grounding them for service to avoid performance degradation.</p>
                 </div>
             </div>
+
+            <GuestRestrictionModal
+                isOpen={isGuestModalOpen}
+                onClose={() => setIsGuestModalOpen(false)}
+            />
         </div>
     );
 };
