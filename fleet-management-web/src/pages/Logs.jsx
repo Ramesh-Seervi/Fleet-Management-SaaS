@@ -25,6 +25,7 @@ import {
 } from '../redux/api/fleetApi';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import ExportButton from '../components/common/ExportButton';
+import toast from 'react-hot-toast';
 
 const cn = (...classes) => classes.filter(Boolean).join(' ');
 
@@ -125,8 +126,9 @@ const Logs = () => {
                 title: '', type: 'routine', cost: '', scheduledDate: new Date().toISOString().split('T')[0],
                 fuelType: 'diesel', quantity: '', pricePerUnit: '', odometer: '', station: ''
             });
+            toast.success(`${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} entry saved successfully!`);
         } catch (err) {
-            alert(err.data?.message || 'Action failed');
+            toast.error(err.data?.message || 'Action failed');
         }
     };
 

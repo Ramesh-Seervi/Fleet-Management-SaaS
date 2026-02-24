@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Truck, Mail, Lock, Loader2, ArrowRight } from 'lucide-react';
 import { useLoginMutation } from '../../redux/api/authApi';
+import toast from 'react-hot-toast';
 
 const Login = () => {
     const [credentials, setCredentials] = useState({ email: '', password: '' });
@@ -13,9 +14,11 @@ const Login = () => {
         try {
             const result = await login(credentials).unwrap();
             localStorage.setItem('token', result.token);
+            toast.success('Welcome back!');
             navigate('/');
         } catch (err) {
             console.error('Failed to login:', err);
+            toast.error(err.data?.message || 'Invalid credentials. Please try again.');
         }
     };
 
@@ -93,6 +96,7 @@ const Login = () => {
                             type="button"
                             onClick={() => {
                                 localStorage.setItem('token', 'dev-bypass-token');
+                                toast.success('Development bypass active');
                                 window.location.href = '/';
                             }}
                             className="w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-xl transition-all"

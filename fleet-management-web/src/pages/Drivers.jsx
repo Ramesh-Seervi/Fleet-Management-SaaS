@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import Modal from '../components/common/Modal';
 import { useGetDriversQuery, useAddDriverMutation } from '../redux/api/fleetApi';
+import toast from 'react-hot-toast';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import ExportButton from '../components/common/ExportButton';
 
@@ -88,8 +89,9 @@ const Drivers = () => {
             await addDriver(formData).unwrap();
             setIsModalOpen(false);
             setFormData({ name: '', email: '', phone: '', licenseNumber: '' });
+            toast.success('Driver onboarded successfully!');
         } catch (err) {
-            alert(err.data?.message || 'Failed to onboard driver');
+            toast.error(err.data?.message || 'Failed to onboard driver');
         }
     };
 

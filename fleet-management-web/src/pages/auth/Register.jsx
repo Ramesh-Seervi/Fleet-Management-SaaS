@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Truck, Mail, Lock, User, Building, Loader2, ArrowRight } from 'lucide-react';
 import { useRegisterMutation } from '../../redux/api/authApi';
+import toast from 'react-hot-toast';
 
 const Register = () => {
     const [formData, setFormData] = useState({
@@ -20,9 +21,11 @@ const Register = () => {
         try {
             // Mapping for backend registerTenant endpoint
             await register(formData).unwrap();
+            toast.success('Registration successful! Please sign in.');
             navigate('/login');
         } catch (err) {
             console.error('Registration failed:', err);
+            toast.error(err.data?.message || 'Registration failed. Please check your details.');
         }
     };
 

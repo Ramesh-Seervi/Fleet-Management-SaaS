@@ -12,6 +12,7 @@ import {
     AlertTriangle
 } from 'lucide-react';
 import { useGetVehiclesQuery, useAddVehicleMutation } from '../redux/api/fleetApi';
+import toast from 'react-hot-toast';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import ExportButton from '../components/common/ExportButton';
 import Modal from '../components/common/Modal';
@@ -54,8 +55,9 @@ const Vehicles = () => {
             await addVehicle(formData).unwrap();
             setIsModalOpen(false);
             setFormData({ registrationNumber: '', make: '', model: '', type: 'truck', year: new Date().getFullYear() });
+            toast.success('Vehicle registered successfully!');
         } catch (err) {
-            alert(err.data?.message || 'Failed to add vehicle');
+            toast.error(err.data?.message || 'Failed to add vehicle');
         }
     };
 
