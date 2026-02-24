@@ -13,6 +13,8 @@ import {
 } from 'lucide-react';
 import Modal from '../components/common/Modal';
 import { useGetDriversQuery, useAddDriverMutation } from '../redux/api/fleetApi';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import ExportButton from '../components/common/ExportButton';
 
 const DriverCard = ({ driver }) => (
     <div className="glass-card p-6 rounded-[2rem] border-slate-100 hover:shadow-2xl hover:shadow-slate-200/50 transition-all duration-300 group">
@@ -113,13 +115,64 @@ const Drivers = () => {
                     <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Driver Registry</h1>
                     <p className="text-slate-500 font-medium">Manage your elite team of transit professionals.</p>
                 </div>
-                <button
-                    onClick={() => setIsModalOpen(true)}
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-brand-500 text-white rounded-2xl font-bold text-sm shadow-xl shadow-brand-500/20 hover:bg-brand-600 hover:-translate-y-0.5 transition-all"
-                >
-                    <Plus size={18} />
-                    Onboard Driver
-                </button>
+                <div className="flex items-center gap-3">
+                    <ExportButton
+                        data={drivers || []}
+                        filename="Fleet_Drivers_Roster"
+                        columns={[
+                            { header: 'Name', key: 'name' },
+                            { header: 'Email', key: 'email' },
+                            { header: 'Phone', key: 'phone' },
+                            { header: 'License', key: 'licenseNumber' },
+                            { header: 'Type', key: 'licenseType' }
+                        ]}
+                    />
+                    <button
+                        onClick={() => setIsModalOpen(true)}
+                        className="inline-flex items-center gap-2 px-6 py-3 bg-brand-500 text-white rounded-2xl font-bold text-sm shadow-xl shadow-brand-500/20 hover:bg-brand-600 hover:-translate-y-0.5 transition-all"
+                    >
+                        <Plus size={18} />
+                        Onboard Driver
+                    </button>
+                </div>
+            </div>
+
+            {/* Drivers Performance Graph */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2 glass-card p-8 rounded-[2rem] border-slate-100">
+                    <h3 className="text-lg font-bold text-slate-900 mb-6">Experience Distribution</h3>
+                    <div className="h-[200px]">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={[
+                                { name: 'Class A', count: 12 },
+                                { name: 'Class B', count: 8 },
+                                { name: 'Class C', count: 5 },
+                                { name: 'Class D', count: 3 },
+                                { name: 'Class E', count: 2 },
+                            ]}>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 11 }} />
+                                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 11 }} />
+                                <Tooltip cursor={{ fill: '#f8fafc' }} />
+                                <Bar dataKey="count" fill="#8b5cf6" radius={[4, 4, 0, 0]} barSize={40}>
+                                    {[0, 1, 2, 3, 4].map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={['#8b5cf6', '#0ea5e9', '#10b981', '#f59e0b', '#ef4444'][index % 5]} />
+                                    ))}
+                                </Bar>
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+                <div className="glass-card p-8 rounded-[2rem] border-slate-100 flex flex-col justify-center">
+                    <div className="text-center">
+                        <p className="text-slate-500 font-bold text-xs uppercase tracking-widest mb-2">Driver Safety Score</p>
+                        <h2 className="text-5xl font-black text-emerald-500">98.4</h2>
+                        <div className="flex items-center justify-center gap-1 mt-2 text-emerald-600 font-bold text-sm">
+                            <TrendingUp size={16} />
+                            <span>+1.2% this month</span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Onboard New Driver">

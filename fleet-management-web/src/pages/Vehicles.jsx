@@ -12,7 +12,8 @@ import {
     AlertTriangle
 } from 'lucide-react';
 import { useGetVehiclesQuery, useAddVehicleMutation } from '../redux/api/fleetApi';
-
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import ExportButton from '../components/common/ExportButton';
 import Modal from '../components/common/Modal';
 
 const VehicleStatus = ({ status }) => {
@@ -72,13 +73,58 @@ const Vehicles = () => {
                     <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Fleet Vehicles</h1>
                     <p className="text-slate-500 font-medium">Manage and track your primary transit assets.</p>
                 </div>
-                <button
-                    onClick={() => setIsModalOpen(true)}
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-brand-500 text-white rounded-2xl font-bold text-sm shadow-xl shadow-brand-500/20 hover:bg-brand-600 hover:-translate-y-0.5 transition-all"
-                >
-                    <Plus size={18} />
-                    Add New Vehicle
-                </button>
+                <div className="flex items-center gap-3">
+                    <ExportButton
+                        data={vehicles || []}
+                        filename="Fleet_Vehicle_Assets"
+                        tableId="vehicles-table"
+                        columns={[
+                            { header: 'Registration', key: 'registrationNumber' },
+                            { header: 'Make', key: 'make' },
+                            { header: 'Model', key: 'model' },
+                            { header: 'Type', key: 'type' },
+                            { header: 'Fuel', key: 'fuelType' },
+                            { header: 'Year', key: 'year' },
+                            { header: 'Status', key: 'status' }
+                        ]}
+                    />
+                    <button
+                        onClick={() => setIsModalOpen(true)}
+                        className="inline-flex items-center gap-2 px-6 py-3 bg-brand-500 text-white rounded-2xl font-bold text-sm shadow-xl shadow-brand-500/20 hover:bg-brand-600 hover:-translate-y-0.5 transition-all"
+                    >
+                        <Plus size={18} />
+                        Add New Vehicle
+                    </button>
+                </div>
+            </div>
+
+            {/* Fleet Stats Graph */}
+            <div className="glass-card p-6 rounded-[2rem] border-slate-100 mb-8">
+                <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-lg font-bold text-slate-900">Vehicle Utilization Trend</h3>
+                    <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 bg-brand-500 rounded-full"></div>
+                        <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Distance Covered</span>
+                    </div>
+                </div>
+                <div className="h-[200px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={[
+                            { name: 'Jan', dist: 4000 },
+                            { name: 'Feb', dist: 3000 },
+                            { name: 'Mar', dist: 5000 },
+                            { name: 'Apr', dist: 2780 },
+                            { name: 'May', dist: 1890 },
+                            { name: 'Jun', dist: 2390 },
+                        ]}>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                            <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 11 }} />
+                            <YAxis hide />
+                            <Tooltip />
+                            <Area type="monotone" dataKey="dist" stroke="#0ea5e9" strokeWidth={3} fill="#0ea5e9" fillOpacity={0.05} />
+                        </AreaChart>
+                    </ResponsiveContainer>
+                </div>
             </div>
 
             <Modal
@@ -200,7 +246,7 @@ const Vehicles = () => {
                 </div>
 
                 <div className="overflow-x-auto">
-                    <table className="w-full text-left">
+                    <table id="vehicles-table" className="w-full text-left">
                         <thead>
                             <tr className="bg-slate-50/50">
                                 <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Vehicle Info</th>
@@ -227,7 +273,7 @@ const Vehicles = () => {
                                             <div>
                                                 <p className="text-sm font-bold text-slate-900 leading-none mb-1">{vehicle.model}</p>
                                                 <p className="text-xs font-medium text-slate-500 flex items-center gap-1.5">
-                                                    {vehicle.plate} • <span className="text-emerald-600 uppercase font-bold tracking-tighter text-[10px]">{vehicle.env}</span>
+                                                    {vehicle.registrationNumber || vehicle.plate} • <span className="text-emerald-600 uppercase font-bold tracking-tighter text-[10px]">{vehicle.fuelType || vehicle.env}</span>
                                                 </p>
                                             </div>
                                         </div>

@@ -12,7 +12,8 @@ import {
     X,
     Bell,
     Search,
-    User
+    User,
+    BarChart3
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -47,6 +48,7 @@ const MainLayout = ({ children }) => {
         { to: '/trips', icon: MapPin, label: 'Trips' },
         { to: '/maintenance', icon: Wrench, label: 'Maintenance' },
         { to: '/fuel-logs', icon: Fuel, label: 'Fuel Logs' },
+        { to: '/reports', icon: BarChart3, label: 'Reports' },
     ];
 
     return (

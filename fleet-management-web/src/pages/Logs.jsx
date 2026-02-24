@@ -23,6 +23,8 @@ import {
     useGetVehiclesQuery,
     useGetDriversQuery
 } from '../redux/api/fleetApi';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
+import ExportButton from '../components/common/ExportButton';
 
 const cn = (...classes) => classes.filter(Boolean).join(' ');
 
@@ -159,13 +161,48 @@ const Logs = () => {
                     <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight uppercase">Operations Log</h1>
                     <p className="text-slate-500 font-medium">Historical data and real-time tracking of fleet activities.</p>
                 </div>
-                <button
-                    onClick={() => setIsModalOpen(true)}
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-brand-500 text-white rounded-2xl font-bold text-sm shadow-xl shadow-brand-500/20 hover:bg-brand-600 transition-all"
-                >
-                    <Plus size={18} />
-                    New {activeTab === 'fuel' ? 'Fuel Log' : activeTab.slice(0, -1)} Entry
-                </button>
+                <div className="flex items-center gap-3">
+                    <ExportButton
+                        data={activeTab === 'trips' ? trips : activeTab === 'maintenance' ? maintenance : fuelLogs}
+                        filename={`Fleet_${activeTab}_Log`}
+                        tableId="logs-container"
+                    />
+                    <button
+                        onClick={() => setIsModalOpen(true)}
+                        className="inline-flex items-center gap-2 px-6 py-3 bg-brand-500 text-white rounded-2xl font-bold text-sm shadow-xl shadow-brand-500/20 hover:bg-brand-600 transition-all"
+                    >
+                        <Plus size={18} />
+                        New {activeTab === 'fuel' ? 'Fuel Log' : activeTab.slice(0, -1)} Entry
+                    </button>
+                </div>
+            </div>
+
+            {/* Ops Analytics */}
+            <div className="glass-card p-8 rounded-[2rem] border-slate-100 mb-8">
+                <div className="flex items-center justify-between mb-8">
+                    <h3 className="text-lg font-bold text-slate-900 capitalize px-2 border-l-4 border-brand-500">
+                        {activeTab} Frequency Matrix
+                    </h3>
+                </div>
+                <div className="h-[200px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={[
+                            { name: 'Mon', count: 4 },
+                            { name: 'Tue', count: 7 },
+                            { name: 'Wed', count: 5 },
+                            { name: 'Thu', count: 9 },
+                            { name: 'Fri', count: 12 },
+                            { name: 'Sat', count: 6 },
+                            { name: 'Sun', count: 3 },
+                        ]}>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                            <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 11 }} />
+                            <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 11 }} />
+                            <Tooltip />
+                            <Line type="monotone" dataKey="count" stroke={activeTab === 'trips' ? '#8b5cf6' : activeTab === 'maintenance' ? '#f59e0b' : '#10b981'} strokeWidth={3} dot={{ r: 4, fill: '#fff', strokeWidth: 3 }} />
+                        </LineChart>
+                    </ResponsiveContainer>
+                </div>
             </div>
 
             <Modal
@@ -395,7 +432,7 @@ const Logs = () => {
                 <TabButton active={activeTab === 'fuel'} onClick={() => handleTabChange('fuel')} icon={Fuel} label="Fuel Logs" />
             </div>
 
-            <div className="glass-card rounded-[2rem] border-slate-100 overflow-hidden min-h-[500px]">
+            <div id="logs-container" className="glass-card rounded-[2rem] border-slate-100 overflow-hidden min-h-[500px]">
                 {activeTab === 'trips' && (
                     <div className="divide-y divide-slate-100">
                         {(trips || [
@@ -411,9 +448,9 @@ const Logs = () => {
                                         </div>
                                         <div>
                                             <div className="flex items-center gap-2">
-                                                <span className="text-sm font-bold text-slate-900">{trip.from}</span>
+                                                <span className="text-sm font-bold text-slate-900">{trip.origin?.address || trip.from}</span>
                                                 <ChevronRight size={14} className="text-slate-400" />
-                                                <span className="text-sm font-bold text-slate-900">{trip.to}</span>
+                                                <span className="text-sm font-bold text-slate-900">{trip.destination?.address || trip.to}</span>
                                             </div>
                                             <p className="text-xs font-medium text-slate-500 mt-1">
                                                 {typeof trip.vehicle === 'object' ? trip.vehicle?.registrationNumber : trip.vehicle} • {typeof trip.driver === 'object' ? trip.driver?.name : trip.driver}
@@ -436,7 +473,11 @@ const Logs = () => {
                                     <div className="flex items-center justify-between lg:justify-end gap-4 min-w-[120px]">
                                         <div className="flex items-center gap-2 text-slate-400">
                                             <Clock size={14} />
-                                            <span className="text-xs font-semibold">{trip.time}</span>
+                                            <span className="text-xs font-semibold">
+                                                {trip.scheduledStart && !isNaN(new Date(trip.scheduledStart).getTime())
+                                                    ? new Date(trip.scheduledStart).toLocaleString()
+                                                    : trip.time}
+                                            </span>
                                         </div>
                                         <button className="p-2 border border-slate-100 rounded-xl group-hover:bg-brand-500 group-hover:text-white group-hover:border-brand-500 transition-all">
                                             <ChevronRight size={20} />
@@ -465,8 +506,14 @@ const Logs = () => {
                                     </p>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-sm font-bold text-slate-900">{item.cost}</p>
-                                    <p className="text-xs font-medium text-slate-400">{item.date}</p>
+                                    <p className="text-sm font-bold text-slate-900">
+                                        {typeof item.cost === 'number' ? `$${item.cost.toLocaleString()}` : item.cost}
+                                    </p>
+                                    <p className="text-xs font-medium text-slate-400">
+                                        {item.scheduledDate && !isNaN(new Date(item.scheduledDate).getTime())
+                                            ? new Date(item.scheduledDate).toLocaleDateString()
+                                            : item.date}
+                                    </p>
                                 </div>
                                 <div className={cn(
                                     "px-3 py-1 rounded-full text-[10px] font-bold border shrink-0",
@@ -491,15 +538,25 @@ const Logs = () => {
                                     <h4 className="text-sm font-bold text-slate-900">
                                         {typeof log.vehicle === 'object' ? log.vehicle?.registrationNumber : log.vehicle}
                                     </h4>
-                                    <p className="text-xs font-medium text-slate-500">{log.station}</p>
+                                    <p className="text-xs font-medium text-slate-500">
+                                        {typeof log.station === 'object' ? log.station?.name : log.station}
+                                    </p>
                                 </div>
                                 <div className="text-center px-8 border-x border-slate-100">
                                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Qty</p>
-                                    <span className="text-xs font-bold text-slate-900">{log.amount}</span>
+                                    <span className="text-xs font-bold text-slate-900">
+                                        {log.quantity || log.amount} {!(log.quantity || log.amount)?.toString().includes(' ') ? (log.unit || 'L') : ''}
+                                    </span>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-sm font-bold text-slate-900">{log.cost}</p>
-                                    <p className="text-xs font-medium text-slate-400">{log.date}</p>
+                                    <p className="text-sm font-bold text-slate-900">
+                                        {typeof (log.totalCost || log.cost) === 'number' ? `$${(log.totalCost || log.cost).toLocaleString()}` : (log.totalCost || log.cost)}
+                                    </p>
+                                    <p className="text-xs font-medium text-slate-400">
+                                        {log.date && !isNaN(new Date(log.date).getTime())
+                                            ? new Date(log.date).toLocaleString()
+                                            : log.date}
+                                    </p>
                                 </div>
                             </div>
                         ))}

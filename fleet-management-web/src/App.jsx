@@ -9,6 +9,7 @@ import Dashboard from './pages/Dashboard'
 import Vehicles from './pages/Vehicles'
 import Drivers from './pages/Drivers'
 import Logs from './pages/Logs'
+import Reports from './pages/Reports'
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
               <Route path="trips" element={<Logs />} />
               <Route path="maintenance" element={<Logs />} />
               <Route path="fuel-logs" element={<Logs />} />
+              <Route path="reports" element={<Reports />} />
             </Routes>
           </MainLayout>
         </ProtectedRoute>
