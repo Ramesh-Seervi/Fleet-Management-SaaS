@@ -10,6 +10,7 @@ import Vehicles from './pages/Vehicles'
 import Drivers from './pages/Drivers'
 import Logs from './pages/Logs'
 import Reports from './pages/Reports'
+import Tracking from './pages/Tracking'
 import { Toaster } from 'react-hot-toast'
 
 function App() {
@@ -32,6 +33,7 @@ function App() {
             <MainLayout>
               <Routes>
                 <Route index element={<Dashboard />} />
+                <Route path="tracking" element={<Tracking />} />
                 <Route path="vehicles" element={<Vehicles />} />
                 <Route path="drivers" element={<Drivers />} />
                 <Route path="trips" element={<Logs />} />

@@ -27,6 +27,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import ExportButton from '../components/common/ExportButton';
 import toast from 'react-hot-toast';
 import GuestRestrictionModal from '../components/common/GuestRestrictionModal';
+import TripMapModal from '../components/common/TripMapModal';
 
 const cn = (...classes) => classes.filter(Boolean).join(' ');
 
@@ -50,6 +51,8 @@ const Logs = () => {
     const navigate = useNavigate();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isGuestModalOpen, setIsGuestModalOpen] = useState(false);
+    const [selectedTrip, setSelectedTrip] = useState(null);
+    const [isMapModalOpen, setIsMapModalOpen] = useState(false);
 
     // Sync tab with URL path
     const getTabFromPath = () => {
@@ -489,8 +492,14 @@ const Logs = () => {
                                                     : trip.time}
                                             </span>
                                         </div>
-                                        <button className="p-2 border border-slate-100 rounded-xl group-hover:bg-brand-500 group-hover:text-white group-hover:border-brand-500 transition-all">
-                                            <ChevronRight size={20} />
+                                        <button
+                                            onClick={() => {
+                                                setSelectedTrip(trip);
+                                                setIsMapModalOpen(true);
+                                            }}
+                                            className="p-2 border border-slate-100 rounded-xl group-hover:bg-brand-500 group-hover:text-white group-hover:border-brand-500 transition-all font-bold text-xs"
+                                        >
+                                            Track
                                         </button>
                                     </div>
                                 </div>
@@ -577,6 +586,12 @@ const Logs = () => {
             <GuestRestrictionModal
                 isOpen={isGuestModalOpen}
                 onClose={() => setIsGuestModalOpen(false)}
+            />
+
+            <TripMapModal
+                isOpen={isMapModalOpen}
+                onClose={() => setIsMapModalOpen(false)}
+                trip={selectedTrip}
             />
         </div>
     );

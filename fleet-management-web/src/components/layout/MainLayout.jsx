@@ -13,7 +13,8 @@ import {
     Bell,
     Search,
     User,
-    BarChart3
+    BarChart3,
+    Navigation
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -54,6 +55,7 @@ const MainLayout = ({ children }) => {
 
     const menuItems = [
         { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
+        { to: '/tracking', icon: Navigation, label: 'Live Tracking' },
         { to: '/vehicles', icon: Truck, label: 'Vehicles' },
         { to: '/drivers', icon: Users, label: 'Drivers' },
         { to: '/trips', icon: MapPin, label: 'Trips' },

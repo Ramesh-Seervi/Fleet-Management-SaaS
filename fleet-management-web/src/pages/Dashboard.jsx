@@ -7,7 +7,9 @@ import {
     AlertCircle,
     Clock,
     ArrowUpRight,
-    ArrowDownRight
+    ArrowDownRight,
+    Navigation,
+    ChevronRight
 } from 'lucide-react';
 import {
     AreaChart,
@@ -20,7 +22,9 @@ import {
     BarChart,
     Bar
 } from 'recharts';
-import { useGetDashboardStatsQuery } from '../redux/api/fleetApi';
+import { useGetDashboardStatsQuery, useGetTripsQuery } from '../redux/api/fleetApi';
+import { useState } from 'react';
+import TripMapModal from '../components/common/TripMapModal';
 
 const StatCard = ({ title, value, icon: Icon, trend, trendValue, color }) => (
     <div className="glass-card p-6 rounded-3xl hover:shadow-2xl hover:shadow-slate-200/50 transition-all duration-300 group">
@@ -49,7 +53,14 @@ const StatCard = ({ title, value, icon: Icon, trend, trendValue, color }) => (
 const cn = (...classes) => classes.filter(Boolean).join(' ');
 
 const Dashboard = () => {
-    const { data: stats, isLoading } = useGetDashboardStatsQuery();
+    const { data: stats, isLoading: statsLoading } = useGetDashboardStatsQuery();
+    const { data: trips, isLoading: tripsLoading } = useGetTripsQuery();
+    const [selectedTrip, setSelectedTrip] = useState(null);
+    const [isMapModalOpen, setIsMapModalOpen] = useState(false);
+
+    const activeTrips = trips?.filter(t => t.status === 'In Transit') || [];
+
+    const isLoading = statsLoading || tripsLoading;
 
     const chartData = [
         { name: 'Mon', trips: 4000 },
@@ -204,7 +215,95 @@ const Dashboard = () => {
                         View Maintenance Log
                     </button>
                 </div>
+
+                {/* Live Operations List */}
+                <div className="lg:col-span-3 glass-card p-8 rounded-[2rem] border-slate-100">
+                    <div className="flex items-center justify-between mb-8">
+                        <div>
+                            <h3 className="text-xl font-extrabold text-slate-900">Live Operations</h3>
+                            <p className="text-slate-500 text-sm font-medium mt-1">Real-time tracking of on-going fleet missions</p>
+                        </div>
+                        <span className="px-4 py-2 bg-emerald-50 text-emerald-600 rounded-xl text-xs font-bold uppercase tracking-wider">
+                            {activeTrips.length} Active Trips
+                        </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {activeTrips.length > 0 ? (
+                            activeTrips.map((trip, i) => (
+                                <div
+                                    key={i}
+                                    onClick={() => {
+                                        setSelectedTrip(trip);
+                                        setIsMapModalOpen(true);
+                                    }}
+                                    className="p-6 rounded-[2rem] bg-slate-50/50 border border-slate-100 hover:bg-white hover:shadow-2xl hover:shadow-slate-200/50 transition-all cursor-pointer group"
+                                >
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 bg-white border border-slate-100 rounded-xl flex items-center justify-center text-brand-500 shadow-sm">
+                                                <Navigation size={20} className="group-hover:rotate-45 transition-transform duration-500" />
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Driver</p>
+                                                <p className="text-sm font-bold text-slate-900 truncate max-w-[120px]">
+                                                    {typeof trip.driver === 'object' ? trip.driver.name : trip.driver}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Progress</p>
+                                            <p className="text-sm font-bold text-emerald-600">65%</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-3 mb-6">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-slate-300"></div>
+                                            <p className="text-xs font-medium text-slate-500 truncate">{trip.origin?.address || trip.from || 'Start Point'}</p>
+                                        </div>
+                                        <div className="ml-[2.5px] w-px h-3 bg-slate-200"></div>
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+                                            <p className="text-xs font-bold text-slate-900 truncate">{trip.destination?.address || trip.to || 'End Point'}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+                                        <div className="flex items-center gap-2">
+                                            <Clock size={14} className="text-slate-400" />
+                                            <span className="text-[11px] font-bold text-slate-500">ETA: 2h 45m</span>
+                                        </div>
+                                        <div className="flex items-center gap-1 text-brand-500 font-bold text-[11px] uppercase tracking-wider group-hover:gap-2 transition-all"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                navigate('/tracking');
+                                            }}
+                                        >
+                                            Track Full Page <ChevronRight size={14} />
+                                        </div>
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="col-span-full py-12 text-center bg-slate-50/50 rounded-[2rem] border border-dashed border-slate-200">
+                                <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 text-slate-300 shadow-sm">
+                                    <Navigation size={32} />
+                                </div>
+                                <p className="text-slate-500 font-bold">No active trips at the moment</p>
+                                <p className="text-slate-400 text-sm mt-1">Check scheduled trips in the Operations Log.</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
             </div>
+
+            {/* Live Tracking Modal */}
+            <TripMapModal
+                isOpen={isMapModalOpen}
+                onClose={() => setIsMapModalOpen(false)}
+                trip={selectedTrip}
+            />
         </div>
     );
 };
