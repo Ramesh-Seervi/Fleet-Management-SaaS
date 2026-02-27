@@ -11,6 +11,9 @@ import Drivers from './pages/Drivers'
 import Logs from './pages/Logs'
 import Reports from './pages/Reports'
 import Tracking from './pages/Tracking'
+import Security from './pages/auth/Security'
+import Profile from './pages/auth/Profile'
+import PlatformInfo from './pages/PlatformInfo'
 import { Toaster } from 'react-hot-toast'
 
 function App() {
@@ -40,6 +43,9 @@ function App() {
                 <Route path="maintenance" element={<Logs />} />
                 <Route path="fuel-logs" element={<Logs />} />
                 <Route path="reports" element={<Reports />} />
+                <Route path="security" element={<Security />} />
+                <Route path="profile" element={<Profile />} />
+                <Route path="platform-info" element={<PlatformInfo />} />
               </Routes>
             </MainLayout>
           </ProtectedRoute>

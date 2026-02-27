@@ -198,4 +198,29 @@ const updateUser = async (req, res) => {
     }
 };
 
-module.exports = { registerTenant, login, registerUser, getMe, getTenantUsers, updateUser };
+// @desc    Change password
+// @route   POST /api/auth/change-password
+// @access  Private
+const changePassword = async (req, res) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({ success: false, message: 'Current and new password are required.' });
+        }
+
+        const user = await User.findById(req.user._id).select('+password');
+        if (!(await user.comparePassword(currentPassword))) {
+            return res.status(401).json({ success: false, message: 'Invalid current password.' });
+        }
+
+        user.password = newPassword;
+        await user.save();
+
+        res.json({ success: true, message: 'Password changed successfully.' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+module.exports = { registerTenant, login, registerUser, getMe, getTenantUsers, updateUser, changePassword };

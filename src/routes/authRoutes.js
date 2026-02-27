@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const {
-    registerTenant, login, registerUser, getMe, getTenantUsers, updateUser,
+    registerTenant, login, registerUser, getMe, getTenantUsers, updateUser, changePassword
 } = require('../controllers/authController');
 const { protect } = require('../middleware/auth');
 const { authorize } = require('../middleware/authorize');
@@ -175,5 +175,31 @@ router.get('/users', protect, authorize('admin', 'manager', 'superadmin'), getTe
  *         description: User updated
  */
 router.patch('/users/:id', protect, authorize('admin', 'superadmin'), updateUser);
+
+/**
+ * @swagger
+ * /api/auth/change-password:
+ *   post:
+ *     summary: Change user password
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [currentPassword, newPassword]
+ *             properties:
+ *               currentPassword:
+ *                 type: string
+ *               newPassword:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Password updated
+ *       401:
+ *         description: Invalid current password
+ */
+router.post('/change-password', protect, changePassword);
 
 module.exports = router;

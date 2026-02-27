@@ -21,6 +21,7 @@ import { twMerge } from 'tailwind-merge';
 import Modal from '../common/Modal';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
+import { useGetProfileQuery } from '../../redux/api/authApi';
 
 function cn(...inputs) {
     return twMerge(clsx(inputs));
@@ -46,6 +47,10 @@ const MainLayout = ({ children }) => {
     const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
     const location = useLocation();
     const navigate = useNavigate();
+    const { data: profileData, isLoading: isProfileLoading } = useGetProfileQuery();
+
+    const user = profileData?.user;
+    const isGuest = localStorage.getItem('token') === 'dev-bypass-token';
 
     const handleLogout = () => {
         localStorage.removeItem('token');
@@ -62,6 +67,8 @@ const MainLayout = ({ children }) => {
         { to: '/maintenance', icon: Wrench, label: 'Maintenance' },
         { to: '/fuel-logs', icon: Fuel, label: 'Fuel Logs' },
         { to: '/reports', icon: BarChart3, label: 'Reports' },
+        { to: '/security', icon: SecurityIcon, label: 'Security' },
+        { to: '/platform-info', icon: Info, label: 'Platform Info' },
     ];
 
     return (
@@ -131,13 +138,24 @@ const MainLayout = ({ children }) => {
                             <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
                         </button>
                         <div className="h-8 w-px bg-slate-200 mx-2"></div>
-                        <div className="flex items-center gap-3 cursor-pointer hover:bg-slate-50 p-1 rounded-xl transition-all">
+                        <div
+                            onClick={() => navigate('/profile')}
+                            className="flex items-center gap-3 cursor-pointer hover:bg-slate-50 p-1 rounded-xl transition-all"
+                        >
                             <div className="w-9 h-9 bg-slate-100 rounded-full flex items-center justify-center text-slate-600 border border-slate-200">
-                                <User size={20} />
+                                {user?.avatar ? (
+                                    <img src={user.avatar} alt="" className="w-full h-full rounded-full object-cover" />
+                                ) : (
+                                    <User icon size={20} />
+                                )}
                             </div>
                             <div className="hidden sm:block">
-                                <p className="text-sm font-semibold text-slate-900 leading-tight">Admin User</p>
-                                <p className="text-xs text-slate-500 uppercase font-bold tracking-wider">Fleet Manager</p>
+                                <p className="text-sm font-semibold text-slate-900 leading-tight">
+                                    {isGuest ? 'Guest User' : (user?.name || 'Loading...')}
+                                </p>
+                                <p className="text-xs text-slate-500 uppercase font-bold tracking-wider">
+                                    {isGuest ? 'Guest' : (user?.role || 'User')}
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -180,5 +198,40 @@ const MainLayout = ({ children }) => {
         </div>
     );
 };
+
+const SecurityIcon = ({ size, className }) => (
+    <svg
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={className}
+    >
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+        <path d="m9 12 2 2 4-4" />
+    </svg>
+);
+
+const Info = ({ size, className }) => (
+    <svg
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={className}
+    >
+        <circle cx="12" cy="12" r="10" />
+        <path d="M12 16v-4" />
+        <path d="M12 8h.01" />
+    </svg>
+);
 
 export default MainLayout;

@@ -17,10 +17,17 @@ export const authApi = apiSlice.injectEndpoints({
             }),
         }),
         getProfile: builder.query({
-            query: () => '/auth/profile',
+            query: () => '/auth/me',
             providesTags: ['User'],
+        }),
+        changePassword: builder.mutation({
+            query: (passwords) => ({
+                url: '/auth/change-password',
+                method: 'POST',
+                body: passwords,
+            }),
         }),
     }),
 });
 
-export const { useLoginMutation, useRegisterMutation, useGetProfileQuery } = authApi;
+export const { useLoginMutation, useRegisterMutation, useGetProfileQuery, useChangePasswordMutation } = authApi;
