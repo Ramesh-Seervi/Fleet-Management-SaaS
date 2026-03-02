@@ -1,25 +1,30 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Truck, Mail, Lock, User, Building, Loader2, ArrowRight } from 'lucide-react';
+import { Truck, Mail, Lock, User, Phone, Shield, Loader2, ArrowRight } from 'lucide-react';
 import { useRegisterMutation } from '../../redux/api/authApi';
 import toast from 'react-hot-toast';
 
 const Register = () => {
     const [formData, setFormData] = useState({
-        orgName: '',
-        orgEmail: '',
-        orgPhone: '',
         adminName: '',
         adminEmail: '',
+        orgPhone: '',
+        role: 'admin',
         adminPassword: '',
+        confirmPassword: '',
     });
     const [register, { isLoading, error }] = useRegisterMutation();
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (formData.adminPassword !== formData.confirmPassword) {
+            toast.error('Passwords do not match');
+            return;
+        }
+
         try {
-            // Mapping for backend registerTenant endpoint
             await register(formData).unwrap();
             toast.success('Registration successful! Please sign in.');
             navigate('/login');
@@ -43,40 +48,8 @@ const Register = () => {
                 <div className="bg-white p-8 rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100">
                     <form onSubmit={handleSubmit} className="space-y-5">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                            <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-2">Organization Name</label>
-                                <div className="relative">
-                                    <Building className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                                    <input
-                                        type="text"
-                                        required
-                                        value={formData.orgName}
-                                        onChange={(e) => setFormData({ ...formData, orgName: e.target.value })}
-                                        className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all outline-none"
-                                        placeholder="Fleet Corp"
-                                    />
-                                </div>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-2">Org Email</label>
-                                <div className="relative">
-                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                                    <input
-                                        type="email"
-                                        required
-                                        value={formData.orgEmail}
-                                        onChange={(e) => setFormData({ ...formData, orgEmail: e.target.value })}
-                                        className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all outline-none"
-                                        placeholder="admin@fleetcorp.com"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                            <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-2">Admin Name</label>
+                            <div className="md:col-span-2">
+                                <label className="block text-sm font-semibold text-slate-700 mb-2">Full Name</label>
                                 <div className="relative">
                                     <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                                     <input
@@ -91,7 +64,7 @@ const Register = () => {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-2">Admin Email</label>
+                                <label className="block text-sm font-semibold text-slate-700 mb-2">Email Address</label>
                                 <div className="relative">
                                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                                     <input
@@ -100,30 +73,78 @@ const Register = () => {
                                         value={formData.adminEmail}
                                         onChange={(e) => setFormData({ ...formData, adminEmail: e.target.value })}
                                         className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all outline-none"
-                                        placeholder="john@fleetcorp.com"
+                                        placeholder="name@company.com"
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-2">Phone Number</label>
+                                <div className="relative">
+                                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                                    <input
+                                        type="tel"
+                                        required
+                                        value={formData.orgPhone}
+                                        onChange={(e) => setFormData({ ...formData, orgPhone: e.target.value })}
+                                        className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all outline-none"
+                                        placeholder="+1 234 567 890"
                                     />
                                 </div>
                             </div>
                         </div>
 
                         <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-2">Password</label>
+                            <label className="block text-sm font-semibold text-slate-700 mb-2">Your Role</label>
                             <div className="relative">
-                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                                <input
-                                    type="password"
+                                <Shield className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                                <select
                                     required
-                                    value={formData.adminPassword}
-                                    onChange={(e) => setFormData({ ...formData, adminPassword: e.target.value })}
-                                    className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all outline-none"
-                                    placeholder="••••••••"
-                                />
+                                    value={formData.role}
+                                    onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                                    className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all outline-none appearance-none cursor-pointer"
+                                >
+                                    <option value="admin">Admin / Fleet Owner</option>
+                                    <option value="manager">Fleet Manager</option>
+                                    <option value="driver">Driver</option>
+                                </select>
                             </div>
-                            <p className="mt-2 text-xs text-slate-400 italic">Minimum 8 characters with at least one number and special character.</p>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-2">Password</label>
+                                <div className="relative">
+                                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                                    <input
+                                        type="password"
+                                        required
+                                        value={formData.adminPassword}
+                                        onChange={(e) => setFormData({ ...formData, adminPassword: e.target.value })}
+                                        className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all outline-none"
+                                        placeholder="••••••••"
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-2">Confirm Password</label>
+                                <div className="relative">
+                                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                                    <input
+                                        type="password"
+                                        required
+                                        value={formData.confirmPassword}
+                                        onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                                        className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all outline-none"
+                                        placeholder="••••••••"
+                                    />
+                                </div>
+                            </div>
                         </div>
 
                         {error && (
-                            <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-100">
+                            <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-100 italic">
                                 {error.data?.message || 'Registration failed. Please check your details.'}
                             </div>
                         )}
@@ -131,7 +152,7 @@ const Register = () => {
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="w-full py-3 bg-brand-500 hover:bg-brand-600 text-white font-bold rounded-xl shadow-lg shadow-brand-500/30 transition-all flex items-center justify-center gap-2 group disabled:opacity-70"
+                            className="w-full py-4 bg-brand-500 hover:bg-brand-600 text-white font-bold rounded-xl shadow-lg shadow-brand-500/30 transition-all flex items-center justify-center gap-2 group disabled:opacity-70 mt-4"
                         >
                             {isLoading ? <Loader2 className="animate-spin" size={20} /> : (
                                 <>

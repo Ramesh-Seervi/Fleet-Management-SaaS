@@ -13,18 +13,21 @@ const generateToken = (id, tenantId, role) => {
 // @access  Public
 const registerTenant = async (req, res) => {
     try {
-        const { orgName, orgEmail, orgPhone, adminName, adminEmail, adminPassword } = req.body;
+        const { orgName, orgEmail, orgPhone, adminName, adminEmail, adminPassword, role } = req.body;
+
+        const tenantEmail = orgEmail || adminEmail;
+        const tenantName = orgName || `${adminName}'s Organization`;
 
         // Check if tenant already exists
-        const existingTenant = await Tenant.findOne({ email: orgEmail });
+        const existingTenant = await Tenant.findOne({ email: tenantEmail });
         if (existingTenant) {
             return res.status(400).json({ success: false, message: 'Organization email already registered.' });
         }
 
         // Create tenant
         const tenant = await Tenant.create({
-            name: orgName,
-            email: orgEmail,
+            name: tenantName,
+            email: tenantEmail,
             phone: orgPhone,
         });
 
@@ -41,7 +44,7 @@ const registerTenant = async (req, res) => {
             name: adminName,
             email: adminEmail,
             password: adminPassword,
-            role: 'admin',
+            role: role || 'admin',
         });
 
         const token = generateToken(user._id, tenant._id, user.role);
